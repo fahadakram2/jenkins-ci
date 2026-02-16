@@ -17,5 +17,19 @@ pipeline {
                 sh 'npm install'
             }
         }
+        stage('Test') {
+            sh 'npm run lint'
+            sh 'npm test -- --watchAll=false'
+        }
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+        stage('Archieve Build') {
+            steps {
+                archiveArtifacts artifacts: 'build/**' fingerprint: true
+            }
+        }
     }
 }
