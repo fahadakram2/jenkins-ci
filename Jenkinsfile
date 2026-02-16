@@ -18,8 +18,11 @@ pipeline {
             }
         }
         stage('Test') {
-            sh 'npm run lint'
-            sh 'npm test -- --watchAll=false'
+            steps {
+                sh 'npm run lint'
+                sh 'npm test -- --watchAll=false'
+            }
+           
         }
         stage('Build') {
             steps {
@@ -28,7 +31,7 @@ pipeline {
         }
         stage('Archieve Build') {
             steps {
-                archiveArtifacts artifacts: 'build/**' fingerprint: true
+                archiveArtifacts artifacts: 'build/**', fingerprint: true
             }
         }
     }
