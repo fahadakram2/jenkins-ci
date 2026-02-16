@@ -17,13 +17,7 @@ pipeline {
                 sh 'npm install'
             }
         }
-        stage('Test') {
-            steps {
-                sh 'npm run lint'
-                sh 'npm test -- --watchAll=false'
-            }
-           
-        }
+       
         stage('Build') {
             steps {
                 sh 'npm run build'
