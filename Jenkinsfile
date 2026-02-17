@@ -1,32 +1,54 @@
 pipeline {
-    agent any
-
-    tools {
-        nodejs 'NodeJs'
-    }
-
+    agent any 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/fahadakram2/jenkins-ci.git'
+                checkout scm
             }
         }
+
         stage('Install Dependency') {
             steps {
-                sh 'npm install'
+                dir('frontend') {
+                    sh 'npm install'
+                }
             }
         }
-       
-        stage('Build') {
+
+        stage('Dependency Check') {
             steps {
-                sh 'npm run build'
+                dir('frontend') {
+                    sh 'npm audit --audit-level=moderate'
+                }
             }
         }
-        stage('Archieve Build') {
+
+        stage('Unit Test') {
             steps {
-                archiveArtifacts artifacts: 'build/**', fingerprint: true
+                dir('frontend') {
+                    sh 'npm test -- --watchAll=false'
+                }
             }
+        }
+
+        stage('Code Coverage') {
+            steps {
+                dir('frontend') {
+                    sh 'npm test -- --coverage --watchAll=false'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Test stage finsihed!"
+        }
+        success {
+            echo "All test stages passed."
+        }
+        failure {
+            echo "some stages failed."
         }
     }
 }
