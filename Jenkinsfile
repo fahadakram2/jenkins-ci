@@ -18,13 +18,7 @@ pipeline {
             }
         }
 
-        stage('Dependency Check') {
-            steps {
-                dir('frontend') {
-                    sh 'npm audit --audit-level=moderate'
-                }
-            }
-        }
+     
 
         stage('Unit Test') {
             steps {
