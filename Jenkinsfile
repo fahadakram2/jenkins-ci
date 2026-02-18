@@ -1,16 +1,24 @@
 pipeline {
     agent any 
+
     tools {
         nodejs "NodeJs"
     }
+
+    environment {
+        SONAR_SCANNER_HOME = tool 'SonarQube-Scanner-600'
+        SONAR_TOKEN = credentials('sonar-token-id')
+    }
+
     stages {
+
         stage('Checkout Code') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Install Dependency') {
+        stage('Install Dependencies') {
             steps {
                 dir('frontend') {
                     sh 'npm install'
@@ -18,20 +26,25 @@ pipeline {
             }
         }
 
-     
-
-        stage('Unit Test') {
+        stage('Unit Test + Coverage') {
             steps {
                 dir('frontend') {
-                    sh 'npm test -- --watchAll=false'
+                    sh 'npm test -- --coverage --watchAll=false'
                 }
             }
         }
 
-        stage('Code Coverage') {
+        stage('SonarQube Analysis') {
             steps {
                 dir('frontend') {
-                    sh 'npm test -- --coverage --watchAll=false'
+                    sh """
+                    ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                    -Dsonar.projectKey=todo-app \
+                    -Dsonar.sources=src \
+                    -Dsonar.host.url=http://sonarqube:9000 \
+                    -Dsonar.login=$SONAR_TOKEN \
+                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                    """
                 }
             }
         }
@@ -39,13 +52,13 @@ pipeline {
 
     post {
         always {
-            echo "Test stage finsihed!"
+            echo "Pipeline finished!"
         }
         success {
-            echo "All test stages passed."
+            echo "All stages passed ✅"
         }
         failure {
-            echo "some stages failed."
+            echo "Pipeline failed ❌"
         }
     }
 }
