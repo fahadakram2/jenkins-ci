@@ -20,31 +20,25 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                dir('frontend') {
-                    sh 'npm install'
-                }
+                sh 'npm install'
             }
         }
 
         stage('Unit Test + Coverage') {
             steps {
-                dir('frontend') {
                     sh 'npm test -- --coverage --watchAll=false'
-                }
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                dir('frontend') {
-                    sh """
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
                     ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
                     -Dsonar.projectKey=todo-app \
                     -Dsonar.sources=src \
-                    -Dsonar.host.url=http://sonarqube:9000 \
-                    -Dsonar.login=$SONAR_TOKEN \
                     -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                    """
+                    '''
                 }
             }
         }
