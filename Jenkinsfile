@@ -32,14 +32,15 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
+               
                     sh '''
                     ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
                     -Dsonar.projectKey=todo-app \
                     -Dsonar.sources=src \
+                    
                     -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
                     '''
-                }
+                
             }
         }
     }
