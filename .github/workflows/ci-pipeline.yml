@@ -1,0 +1,54 @@
+name: ci-pipeline
+
+on: 
+    push:
+        branches:
+            - main
+            - 'feature/*'
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: setup node
+              uses: actions/setup-node@v4
+              with:
+                node-version: '18'
+
+            - name: Install Dependency
+              run: npm install
+
+            - name: Run Lint
+              run: npm run lint
+
+    test:
+      needs: lint
+      strategy:
+        matrix:
+            os: [ubuntu-latest]
+            node: [18, 20]
+      runs-on: ${{ matrix.os }}
+
+      steps:
+        - name: Checkout code
+          run: npm install
+        - name: setup node
+          uses: actions/setup-node@v4
+          with:
+            node-version: ${{ matrix.node }}
+
+        - name: Caching Dependency
+          uses: actions/cache@v4
+          with:
+            path: ~/.npm
+            key: node-${{ hashFiles('package-lock.json') }}
+
+        - name: Install Dependency
+          run: npm install
+
+        - name: Run Tests
+          run: npm run test
+
